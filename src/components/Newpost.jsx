@@ -1,43 +1,78 @@
-import React,{useState} from 'react'
-
+import React, { useState } from 'react';
 const Newpost = () => {
-  const { blogtitle,setBlogtitle } = useState("dummy");
-  const { subtitle, setSubtitle } = useState(null);
-  const { blog, setBlog } = useState(null);
+  const formStyle = { display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" };
+  const labelStyle = { margin: "10px 3px" };
+
+  const [title, settitle] = useState("");
+  const [content, setcontent] = useState("");
+  const [subtitle, setsubtitle] = useState("");
+  const [ispending, setIspending] = useState(false);
 
 
-  const handletitle = (x) => {
-    setBlogtitle(x);
+  const handlesubmit = (e) => {
+    e.preventDefault();
+    setIspending(true);
+    const blog = {
+      title,
+      content,
+      subtitle,
+      summary: content.substring(0, 40),
+      likes: 0
+    }
+
+    fetch('http://localhost:8000/blogs', {
+      method: 'POST',
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(blog)
+    }).then(() => {
+      console.log("new blog added");
+      setIspending(false);
+    })
   }
-  // const blogdata = {
-  //   title: title,
-  //   subtitle: subtitle,
-  //   blog: blog
-  // }
 
   return (
-    <div>
-      <form action="" style={{margin:"5% 20%", padding:"0 10%"}}>
-      <div className="input input-group-lg" style={{margin:"15px 0"}}>
-        <label htmlFor='title'>Title</label>
-          <input type="text" id='title' className="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default"
-          value={blogtitle}
-          onChange={(e) => handletitle(e.target.value)}
+    <div className='create'>
+      <form onSubmit={handlesubmit} style={formStyle}>
+        <label style={labelStyle}>Blog Title
+          <input
+            type="text"
+            required
+            style={{ width: "50vw", minWidth: "200px", display: "block" }}
+            value={title}
+            onChange={(e) => settitle(e.target.value)}
           />
-        <label htmlFor='subtitle'>Subtitle</label>
-          <input type="text" id='subtitle' className="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default"
-          onChange={(e)=>{setSubtitle(e.target.value)}}
+        </label>
+        <label style={labelStyle}>Blog Content
+          <textarea
+            rows="10"
+            required
+            style={{ width: "50vw", minWidth: "200px", display:"block"}}
+            value={content}
+            onChange={(e) => setcontent(e.target.value)}
           />
-      </div>
-      <div className="input" style={{margin:"15px 0"}}>
-        <label htmlFor='blog'>Blog</label>
-        <textarea className="form-control" aria-label="With textarea" id='blog' onChange={(e)=>{setBlog(e.target.value)}}></textarea>
-      </div> 
-        <button type="button" style={{margin:"15px 0"}} className="d-grid gap-2 col-3 mx-auto btn btn-primary btn-md">Large button</button>  
+        </label>
+        <label style={labelStyle}>
+          Blog Subtitle
+          <input
+            type="text"
+            required
+            style={{ width: "50vw", minWidth: "200px", display: "block" }}
+            value={subtitle}
+            onChange={(e) => setsubtitle(e.target.value)}
+          />
+        </label>
+        
+        {ispending &&
+            <div className="text-center">
+                <div className="spinner-border" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        }
+        {(!ispending) && <button type='submit'>Submit</button> }
       </form>
-      <p>{blogtitle}</p>
     </div>
-  )
+  );
 }
 
 export default Newpost
